@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>魔法競技場｜猜拳冒險</title>
+<style>
+:root{--ink:#f8f5ff;--muted:#d8d0f2;--pink:#ff8bd4;--cyan:#81f4ff;--violet:#a78bfa;--panel:rgba(17,13,48,.76)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;background:#100d2e;overflow-x:hidden}
+.backdrop{position:fixed;inset:0;z-index:-2;overflow:hidden;background:radial-gradient(ellipse at 18% 15%,#5541a4 0,transparent 34%),radial-gradient(ellipse at 80% 25%,#9b397d 0,transparent 30%),linear-gradient(140deg,#100d2e 0%,#25144f 48%,#111b43 100%)}
+.backdrop:before{content:"";position:absolute;inset:0;background-image:radial-gradient(#fff 1px,transparent 1.5px),radial-gradient(#a9f9ff 1px,transparent 1.5px);background-size:73px 73px,113px 113px;background-position:0 0,28px 42px;opacity:.55}
+.moon{position:absolute;right:8%;top:8%;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle at 35% 32%,#fff8ff,#ffc9f1 42%,#b8a3ff 72%,#8b79dc);box-shadow:0 0 55px #e8aaff88,0 0 130px #b27bff44}
+.mountain{position:absolute;bottom:-3px;width:120%;height:35%;left:-10%;background:linear-gradient(150deg,#31255f,#17193d 70%);clip-path:polygon(0 76%,12% 42%,22% 66%,38% 18%,52% 70%,67% 32%,82% 68%,92% 38%,100% 70%,100% 100%,0 100%)}
+.mountain.two{height:23%;opacity:.8;transform:scaleX(-1);background:linear-gradient(150deg,#433071,#13142f)}
+.wrap{width:min(1050px,92vw);margin:auto;padding:34px 0 54px}
+header{text-align:center;margin:18px 0 28px}
+.kicker{letter-spacing:.24em;color:var(--cyan);font-size:.78rem;font-weight:800}
+h1{font-size:clamp(2.1rem,6vw,4.1rem);line-height:1.08;margin:10px 0;background:linear-gradient(90deg,#fff,#ffc4ec 45%,#9af7ff);color:transparent;background-clip:text;text-shadow:0 0 35px #f6a6ff30}
+.subtitle{color:var(--muted);margin:0}
+.layout{display:grid;grid-template-columns:1fr 1.05fr;gap:18px;align-items:start}
+.panel{background:var(--panel);border:1px solid #c5b5ff44;border-radius:24px;padding:22px;box-shadow:0 20px 70px #07051b66;backdrop-filter:blur(14px)}
+h2{font-size:1.15rem;margin:0 0 16px;color:#ffe1f5}
+label{display:block;font-size:.9rem;color:var(--muted);margin:12px 0 6px}
+input,select{width:100%;padding:12px 13px;border-radius:12px;border:1px solid #b9a6ff55;background:#100d2e;color:white;font:inherit;outline:none}
+input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #81f4ff20}
+.gear-grid{display:grid;gap:9px;margin-top:8px}
+.gear{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #b9a6ff3d;border-radius:14px;background:#ffffff08;cursor:pointer;transition:.2s}
+.gear:has(input:checked){border-color:var(--pink);background:#ff8bd417;box-shadow:0 0 20px #ff8bd41a}
+.gear input{width:auto;margin-top:5px;accent-color:#ff8bd4}
+.gear strong{display:block;font-size:.95rem;color:#fff}
+.gear small{display:block;color:#c9c0e7;line-height:1.45;margin-top:3px}
+.primary,.choice{border:0;cursor:pointer;color:#1b123c;font:inherit;font-weight:850;background:linear-gradient(100deg,#ff9cda,#a8f6ff);box-shadow:0 8px 24px #a17eff26;transition:transform .15s,filter .15s}
+.primary{width:100%;padding:13px;border-radius:13px;margin-top:16px}
+.primary:hover,.choice:hover{transform:translateY(-2px);filter:brightness(1.08)}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+.battle-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:15px}
+.badge{font-size:.78rem;padding:6px 10px;border-radius:999px;color:var(--cyan);background:#81f4ff14;border:1px solid #81f4ff35}
+.score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin:15px 0 18px}
+.scorebox{text-align:center;padding:13px 8px;border-radius:16px;background:#ffffff09;border:1px solid #ffffff16}
+.scorebox .num{font-size:2.2rem;font-weight:900;line-height:1.2}
+.scorebox span:last-child{font-size:.85rem;color:var(--muted)}
+.colon{color:var(--pink);font-weight:900;font-size:1.4rem}
+.arena{min-height:130px;border-radius:18px;background:linear-gradient(130deg,#8d5ce51c,#ff8bd41a);border:1px solid #d9c6ff2b;display:grid;place-items:center;text-align:center;padding:16px;margin:12px 0}
+.versus{display:flex;justify-content:center;align-items:center;gap:20px;font-size:2.8rem}
+.vs{font-size:.85rem;color:#ffc4ec;font-weight:900;letter-spacing:.15em}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.choice{border-radius:15px;padding:14px 6px;font-size:1rem}
+.choice span{display:block;font-size:2rem;margin-bottom:4px}
+.log{height:165px;overflow:auto;padding:12px;border-radius:14px;background:#08071d80;border:1px solid #ffffff12;color:#dcd5f4;font-size:.88rem;line-height:1.7}
+.log p{margin:0 0 4px}
+.log .good{color:#9effd0}.log .bad{color:#ffb3d6}.log .skill{color:#9cf5ff}
+.status{color:var(--muted);font-size:.9rem;min-height:1.5em}
+.footer{text-align:center;color:#c3b8e8;font-size:.8rem;margin-top:22px}
+.hidden{display:none!important}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.moon{width:120px;height:120px;right:-5px;top:5%}.wrap{padding-top:20px}.panel{padding:18px}}
+</style>
+</head>
+<body>
+<div class="backdrop" aria-hidden="true"><div class="moon"></div><div class="mountain"></div><div class="mountain two"></div></div>
+<div class="wrap">
+<header><div class="kicker">✦ ARCANE DUEL · MAGIC ACADEMY ✦</div><h1>魔法競技場</h1><p class="subtitle">召喚你的裝備，在星月之下挑戰猜拳試煉！先拿下 5 勝即可獲勝。</p></header>
+<div class="layout">
+<section class="panel">
+<h2>✧ 冒險者登錄</h2>
+<label for="mageName">法師名字</label><input id="mageName" maxlength="24" placeholder="輸入你的名字，例如：凪咲">
+<h2 style="margin-top:23px">✧ 選擇魔法裝備</h2>
+<div class="gear-grid">
+<label class="gear"><input type="radio" name="gear" value="hook" checked><span><strong>⛓️ 深淵魔鉤</strong><small>平手時可發動一次，將平手轉為勝利。</small></span></label>
+<label class="gear"><input type="radio" name="gear" value="dragon"><span><strong>🐉 元素適應龍甲</strong><small>敗北後記住電腦出的拳；若下回合電腦出相同拳，抵銷該次敗場。</small></span></label>
+<label class="gear"><input type="radio" name="gear" value="cloak"><span><strong>🌫️ 幻影斗篷</strong><small>落敗時可抵銷一次敗場，並預見電腦下一回合的動作。</small></span></label>
+</div>
+<button id="startBtn" class="primary">✦ 開始冒險</button>
+<p class="status" id="setupStatus">準備好你的咒語了嗎？</p>
+</section>
+<section class="panel">
+<div class="battle-top"><h2 style="margin:0">⚔️ 星月對決</h2><span class="badge" id="roundBadge">尚未開始</span></div>
+<div class="score">
+<div class="scorebox"><div class="num" id="playerScore">0</div><span id="playerLabel">冒險者</span></div><div class="colon">:</div>
+<div class="scorebox"><div class="num" id="computerScore">0</div><span>魔法傀儡</span></div>
+</div>
+<div class="arena"><div><div class="versus"><span id="playerHand">✧</span><span class="vs">VS</span><span id="computerHand">✧</span></div><div id="arenaMessage" style="margin-top:8px;color:#e7defb">請先開始冒險</div></div></div>
+<div class="choices">
+<button class="choice" data-choice="石頭" disabled><span>✊</span>石頭</button>
+<button class="choice" data-choice="剪刀" disabled><span>✌️</span>剪刀</button>
+<button class="choice" data-choice="布" disabled><span>✋</span>布</button>
+</div>
+<p class="status" id="status">裝備選擇完成後，按「開始冒險」。</p>
+<h2 style="margin-top:18px">✧ 冒險紀錄</h2>
+<div class="log" id="log" aria-live="polite"><p>星之門尚未開啟……</p></div>
+<button id="againBtn" class="primary hidden">↻ 再來一場</button>
+</section>
+</div>
+<div class="footer">✦ 以勇氣為咒語，以智慧定勝負 ✦</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const choices=[...document.querySelectorAll('.choice')];
+const icons={'石頭':'✊','剪刀':'✌️','布':'✋'};
+const gearNames={hook:'深淵魔鉤',dragon:'元素適應龍甲',cloak:'幻影斗篷'};
+let game={active:false,name:'',gear:'hook',p:0,c:0,round:1,hookUsed:false,dragonAgainst:null,illusionUsed:false,insight:false};
+function log(msg,kind=''){const p=document.createElement('p');p.textContent=msg;if(kind)p.className=kind;$('log').prepend(p)}
+function setChoices(on){choices.forEach(b=>b.disabled=!on)}
+function score(){ $('playerScore').textContent=game.p;$('computerScore').textContent=game.c;$('roundBadge').textContent=game.active?`第 ${game.round} 回合`:'戰鬥結束';}
+function start(){
+ game={active:true,name:$('mageName').value.trim()||'無名法師',gear:document.querySelector('input[name="gear"]:checked').value,p:0,c:0,round:1,hookUsed:false,dragonAgainst:null,illusionUsed:false,insight:false};
+ $('playerLabel').textContent=game.name;$('playerHand').textContent='✧';$('computerHand').textContent='✧';$('arenaMessage').textContent=`${game.name}，你的試煉開始了！`;
+ $('log').innerHTML='';log(`歡迎大法師 ${game.name}！你裝備了【${gearNames[game.gear]}】。`,'skill');log('先獲得 5 勝即可贏得競技場。');
+ $('setupStatus').textContent=`目前裝備：${gearNames[game.gear]}`;$('status').textContent='選擇石頭、剪刀或布，施展你的第一個咒語！';
+ $('againBtn').classList.add('hidden');setChoices(true);score();
+}
+function play(player){
+ if(!game.active)return;
+ const computer=['石頭','剪刀','布'][Math.floor(Math.random()*3)];
+ $('playerHand').textContent=icons[player];$('computerHand').textContent=icons[computer];
+ let message='',kind='';
+ if(game.gear==='cloak'&&game.insight){log(`幻影斗篷預見了未來：電腦出了【${computer}】！`,'skill');game.insight=false}
+ if(player===computer){
+  if(game.gear==='hook'&&!game.hookUsed){game.p++;game.hookUsed=true;message='深淵魔鉤發動！平手被扭轉為你的勝利！';kind='skill'}
+  else{message='平手！雙方都沒有得分。';kind=''}
+  if(game.gear==='dragon')game.dragonAgainst=null;
+ }else if((player==='石頭'&&computer==='剪刀')||(player==='剪刀'&&computer==='布')||(player==='布'&&computer==='石頭')){
+  game.p++;message='漂亮的反擊！這回合你贏了！';kind='good';if(game.gear==='dragon')game.dragonAgainst=null;
+ }else{
+  if(game.gear==='dragon'&&computer===game.dragonAgainst){message=`元素龍甲吸收了【${computer}】攻擊！這次敗場被抵銷。`;kind='skill';game.dragonAgainst=null}
+  else if(game.gear==='cloak'&&!game.illusionUsed){message='幻影斗篷留下殘影！抵銷敗場，並預見下一回合。';kind='skill';game.illusionUsed=true;game.insight=true}
+  else{game.c++;message='魔法傀儡得分了！下回合再扳回來。';kind='bad';if(game.gear==='dragon'){game.dragonAgainst=computer;log(`龍甲已適應【${computer}】，若下回合電腦再出同樣的拳，將抵銷敗場。`,'skill')}}
+ }
+ $('arenaMessage').textContent=message;$('status').textContent=`你出了${player}，電腦出了${computer}。`;
+ log(`第 ${game.round} 回合｜你：${player}／電腦：${computer}。${message}`,kind);
+ game.round++;score();
+ if(game.p>=5||game.c>=5){game.active=false;setChoices(false);$('roundBadge').textContent='戰鬥結束';$('arenaMessage').textContent=game.p>=5?`勝利！${game.name} 成為競技場冠軍！`:'這次由魔法傀儡勝出，再修練後回來挑戰吧！';$('status').textContent=`最終比分：${game.p} : ${game.c}`;log(game.p>=5?'🎉 恭喜！你贏得了魔法競技場！':'💫 挑戰結束，下一次一定能更強！',game.p>=5?'good':'bad');$('againBtn').classList.remove('hidden')}
+}
+$('startBtn').addEventListener('click',start);choices.forEach(b=>b.addEventListener('click',()=>play(b.dataset.choice)));$('againBtn').addEventListener('click',start);
+</script>
+</body>
+</html>
